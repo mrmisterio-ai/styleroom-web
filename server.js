@@ -20,12 +20,18 @@ app.use('/api', createProxyMiddleware({
   },
 }));
 
-// Static files
-app.use(express.static(path.join(__dirname, 'dist')));
+// Static files with SPA fallback
+app.use(express.static(path.join(__dirname, 'dist'), {
+  index: false
+}));
 
-// SPA fallback
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+// SPA fallback - catch all routes that aren't API or static files
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  } else {
+    next();
+  }
 });
 
 app.listen(PORT, () => {
